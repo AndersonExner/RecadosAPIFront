@@ -1,7 +1,7 @@
 import axios, {AxiosResponse} from "axios"
 import { ResponseAPI } from "../store/modules/typeStore"
 
-axios.defaults.baseURL = 'http://localhost:8080'
+axios.defaults.baseURL = 'https://recadosapi.onrender.com/'
 
 export const apiGet = async (rota: string): Promise<ResponseAPI> => {
   try{
