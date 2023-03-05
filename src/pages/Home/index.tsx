@@ -209,15 +209,16 @@ export function Home(){
       <Grid container>
         <Grid xs={12}>
 
+
+          <TableContainer component={Paper}>
+
           {loading === true &&(
                 <Box width={'100vw'} height={'50vh'} display={'flex'} justifyContent={'center'} alignContent={'center'} textAlign={'center'}>
                   <CircularIndeterminate/>
                 </Box>
           )}
 
-          <TableContainer component={Paper}>
             <Table aria-label="simple table">
-
               <TableHead> 
                 
                 <TableRow >
