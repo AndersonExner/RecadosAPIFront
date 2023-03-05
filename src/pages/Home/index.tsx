@@ -212,11 +212,6 @@ export function Home(){
 
           <TableContainer component={Paper}>
 
-          {loading === true &&(
-                <Box width={'100vw'} height={'50vh'} display={'flex'} justifyContent={'center'} alignContent={'center'} textAlign={'center'}>
-                  <CircularIndeterminate/>
-                </Box>
-          )}
 
             <Table aria-label="simple table">
               <TableHead> 
@@ -228,6 +223,13 @@ export function Home(){
                   <TableCell width={'20%'}align="center">Ações</TableCell>
                 </TableRow>
               </TableHead>
+
+              {loading === true &&(
+                <Box width={'100vw'} height={'50vh'} display={'flex'} justifyContent={'center'} alignContent={'center'} textAlign={'center'}>
+                  <CircularIndeterminate/>
+                </Box>
+              )}
+
               {loading === false && (
               <TableBody>
                 {mode === 'normal' && (
