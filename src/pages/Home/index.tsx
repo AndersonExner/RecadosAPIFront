@@ -8,6 +8,7 @@ import {  RecadoData } from '../../store/modules/typeStore';
 import { buscarRecados, getRecadosUser, newRecado } from '../../store/modules/recados/recadosSlice';
 import { useAppThemeContext } from '../../Context/ThemeContext';
 import { getUserById } from '../../store/modules/userLogged/userLoggedSlice';
+import CircularIndeterminate from '../../components/Loader';
 
 
 export function Home(){
@@ -19,10 +20,12 @@ export function Home(){
   const [modeModal, setModeModal] = useState<'editarRecado' | 'deletarRecado' | 'arquivarRecado' | 'desarquivarRecado'>('editarRecado');
   const [mode, setMode] = useState<'normal' | 'arquivados'>('normal');
   const [openModal, setOpenModal] = useState(false)
+  const [loading, setLoading] = useState(false)
   
   //informaçoes usuario e recados
   const userLogged = useAppSelector((state) => state.userLogged);
-  
+  const respostaRecados = useAppSelector((state) => state.recados)
+
   const recadosRedux = useAppSelector(buscarRecados)
 
   const [recadosNormais, setRecadosNormais] = useState(recadosRedux)
@@ -60,7 +63,23 @@ export function Home(){
     },
     [recadosRedux]
     );
+
+    useEffect(
+      () => {
+        if(respostaRecados.loading === true){
+          setLoading(true)
+          console.log('carregando');
+        }
   
+        if(respostaRecados.loading === false){
+          setLoading(false)
+          console.log('carregado');
+        }
+      },
+      [respostaRecados.loading]
+    )
+
+
   const mudarInput = (value:string, key:InputName) => {
     switch(key) {
       case 'description':
@@ -193,7 +212,14 @@ export function Home(){
           <TableContainer component={Paper}>
             <Table aria-label="simple table">
 
-              <TableHead>
+            {loading === true &&(
+                <Box width={'100vw'} height={'50vh'} display={'flex'} justifyContent={'center'} alignContent={'center'} textAlign={'center'}>
+                  <CircularIndeterminate/>
+                </Box>
+            )}
+
+              <TableHead> 
+                
                 <TableRow >
                   <TableCell width={'10%'} align="center">ID</TableCell>
                   <TableCell width={'20%'} align="center">Descrição</TableCell>
@@ -201,7 +227,7 @@ export function Home(){
                   <TableCell width={'20%'}align="center">Ações</TableCell>
                 </TableRow>
               </TableHead>
-
+              {loading === false && (
               <TableBody>
                 {mode === 'normal' && (
                   recadosNormais.map((row, index) =>  
@@ -231,6 +257,8 @@ export function Home(){
                   </TableRow>
                   ))}
               </TableBody>
+
+              )}
 
             </Table>
           </TableContainer>
