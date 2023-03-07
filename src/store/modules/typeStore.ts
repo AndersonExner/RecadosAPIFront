@@ -18,6 +18,11 @@ export interface KeyData {
   key: string
 }
 
+export interface ArquivadosData {
+  idUser: string,
+  key: boolean
+}
+
 export interface User {
   id: string;
   name: string;

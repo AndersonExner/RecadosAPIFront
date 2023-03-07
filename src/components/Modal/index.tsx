@@ -1,7 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
 import React, {useState, useEffect} from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { buscarRecadosId, deleteRecado, updateRecado } from '../../store/modules/recados/recadosSlice';
+import { buscarRecadosId, deleteRecado, getRecadosUser, updateRecado } from '../../store/modules/recados/recadosSlice';
 import { RecadoData } from '../../store/modules/typeStore';
 
 

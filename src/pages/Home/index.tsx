@@ -5,7 +5,7 @@ import { InputDefault, InputName } from '../../components/InputDefault';
 import { ModalAttDel} from '../../components/Modal';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {  KeyData, RecadoData, Recado } from '../../store/modules/typeStore';
-import { buscarRecados, getRecadosUser, newRecado, getRecadosUserbyKey } from '../../store/modules/recados/recadosSlice';
+import { buscarRecados, getRecadosUser, newRecado, getRecadosUserbyKey, getRecadosArquivados } from '../../store/modules/recados/recadosSlice';
 import { useAppThemeContext } from '../../Context/ThemeContext';
 import { getUserById } from '../../store/modules/userLogged/userLoggedSlice';
 import CircularIndeterminate from '../../components/Loader';
@@ -18,8 +18,9 @@ export function Home(){
   const [keyBusca, setKeyBusca] = useState('');
   const [detail, setDetail] = useState('');
   const [idSelec, setIdSelec] = useState('');
+  const [mode, setMode] = useState <'normal' | 'arquivado'> ('normal')
   const [modeModal, setModeModal] = useState<'editarRecado' | 'deletarRecado' | 'arquivarRecado' | 'desarquivarRecado'>('editarRecado');
-  const [mode, setMode] = useState<'normal' | 'arquivados' | 'filtrados'>('normal');
+
   const [openModal, setOpenModal] = useState(false)
   const [loading, setLoading] = useState(false)
   
@@ -28,10 +29,6 @@ export function Home(){
   const respostaRecados = useAppSelector((state) => state.recados)
 
   const recadosRedux = useAppSelector(buscarRecados)
-
-  const [recadosNormais, setRecadosNormais] = useState(recadosRedux)
-  const [recadosArquivados, setRecadosArquivados] = useState (recadosRedux)
-  const [recadosFiltrados, setRecadosFiltrados] = useState (recadosRedux)
     
   const dispatch = useAppDispatch();
   const navigate =  useNavigate();
@@ -50,20 +47,16 @@ export function Home(){
       if(ID === ""){
         navigate('/')
       }
-      
-      dispatch(getUserById(ID))  
-
     },
-    [navigate, dispatch, ID]
+    [navigate]
   );
 
   useEffect(
-      () => {
-      setRecadosArquivados(recadosRedux.filter((e) => e.check === true))
-      setRecadosNormais(recadosRedux.filter((e) => e.check === false))
-    },
-    [recadosRedux]
-    );
+  () => {
+    dispatch(getRecadosUser(ID))
+  },
+  [dispatch]
+  )
 
     useEffect(
       () => {
@@ -121,11 +114,7 @@ export function Home(){
     setDetail('')
   }
 
-  const save = () => { 
-  }
-
-
-  const logOut = () => {
+    const logOut = () => {
     localStorage.setItem('userLoggedId', JSON.stringify(''))
     navigate('/') 
   }
@@ -142,6 +131,16 @@ export function Home(){
     setOpenModal(true); 
   }
 
+  const buscarArquivados = () => {
+    setMode('arquivado')
+    dispatch(getRecadosArquivados(ID))
+  }
+
+  const buscarRecadosNormais = () => {
+    setMode('normal')
+    dispatch(getRecadosUser(ID))
+  }
+
   const arquivarMessage = (id: string) => {
     setModeModal('arquivarRecado');
     setIdSelec(id);
@@ -156,7 +155,7 @@ export function Home(){
 
   const buscarKey = () => {
     if(keyBusca === ""){
-      alert('Campo vazio')
+      dispatch(getRecadosUser(ID))
       return
     }
   
@@ -166,6 +165,7 @@ export function Home(){
     }
   
     dispatch(getRecadosUserbyKey(chaveBuscaData))
+    
   }
 
   const handleCloseModal = () => { 
@@ -218,15 +218,13 @@ export function Home(){
             <Button variant='contained' color='primary' size='large' onClick={buscarKey}>Buscar</Button>
           </Grid>
           <Grid md={2} xs={12}  >
-            <Button variant='contained' color='primary' size='large' onClick={() => setMode('normal')}>Limpar Filtro</Button>
-          </Grid>
-          <Grid md={2} xs={12}>
             {mode === 'normal' && (
-              <Button variant='contained' color='primary' size='large' onClick={() => setMode('arquivados')}>Ver Recados Arquivados</Button>
+              <Button variant='contained' color='primary' size='large' onClick={buscarArquivados}>Ver Recados Arquivados</Button>
             )}
-            {mode === 'arquivados' && (
-              <Button variant='contained' color='primary' size='large' onClick={() => setMode('normal')}>Ver Normais</Button>
-            )}  
+
+            {mode === 'arquivado' && (
+              <Button variant='contained' color='primary' size='large' onClick={buscarRecadosNormais}>Ver Recados  Não Arquivados</Button>
+            )}
           </Grid>
         </Grid>
       
@@ -259,8 +257,8 @@ export function Home(){
 
               {loading === false && (
               <TableBody>
-                {mode === 'normal' && (
-                  recadosNormais.map((row, index) =>  
+                {
+                  recadosRedux.map((row, index) =>  
                   <TableRow component="th" scope="row" key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell align="center">{index + 1}</TableCell>
                     <TableCell align="center">{row.description}</TableCell>
@@ -268,38 +266,16 @@ export function Home(){
                     <TableCell align="center">
                       <Button color='success' variant='contained' sx={{margin: '0 15px'}} onClick={() => editMessage(row.id)}>Editar</Button>
                       <Button color='error' variant='contained' sx={{margin: '0 15px'}} onClick={() => deleteMessage(row.id)}>Apagar</Button>
-                      <Button color='info' variant='contained' sx={{margin: '0 15px'}} onClick={() => arquivarMessage(row.id)}>Arquivar</Button>
+                      {mode === 'normal' && (
+                        <Button color='info' variant='contained' sx={{margin: '0 15px'}} onClick={() => arquivarMessage(row.id)}>Arquivar</Button>
+                      )}
+                      {mode === 'arquivado' && (
+                        <Button color='info' variant='contained' sx={{margin: '0 15px'}} onClick={() => desarquivarMessage(row.id)}>Desarquivar</Button>
+                      )}
                     </TableCell>
                   </TableRow>
-                  ))}
+                  )}
 
-                  {mode === 'arquivados' && (
-                  recadosArquivados.map((row, index) =>  
-                  <TableRow component="th" scope="row" key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell align="center">{index + 1}</TableCell>
-                    <TableCell align="center">{row.description}</TableCell>
-                    <TableCell align="center">{row.detail}</TableCell>
-                    <TableCell align="center">
-                      <Button color='success' variant='contained' sx={{margin: '0 15px'}} onClick={() => editMessage(row.id)}>Editar</Button>
-                      <Button color='error' variant='contained' sx={{margin: '0 15px'}} onClick={() => deleteMessage(row.id)}>Apagar</Button>
-                      <Button color='info' variant='contained' sx={{margin: '0 15px'}} onClick={() => desarquivarMessage(row.id)}>Desarquivar</Button>
-                    </TableCell>
-                  </TableRow>
-                  ))}
-
-                  {mode === 'filtrados' && (
-                  recadosFiltrados.map((row, index) =>  
-                  <TableRow component="th" scope="row" key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell align="center">{index + 1}</TableCell>
-                    <TableCell align="center">{row.description}</TableCell>
-                    <TableCell align="center">{row.detail}</TableCell>
-                    <TableCell align="center">
-                      <Button color='success' variant='contained' sx={{margin: '0 15px'}} onClick={() => editMessage(row.id)}>Editar</Button>
-                      <Button color='error' variant='contained' sx={{margin: '0 15px'}} onClick={() => deleteMessage(row.id)}>Apagar</Button>
-                      <Button color='info' variant='contained' sx={{margin: '0 15px'}} onClick={() => desarquivarMessage(row.id)}>Desarquivar</Button>
-                    </TableCell>
-                  </TableRow>
-                  ))}
               </TableBody>
 
               )}

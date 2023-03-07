@@ -1,7 +1,7 @@
 import { createAsyncThunk, createEntityAdapter, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../..';
 import { apiDelete, apiGet, apiPost, apiPut } from '../../../serviceAPI/serviceAPI';
-import { KeyData, Recado, RecadoData, ResponseAPI } from '../typeStore';
+import { ArquivadosData, KeyData, Recado, RecadoData, ResponseAPI } from '../typeStore';
 
 const adapter = createEntityAdapter<Recado>({
   selectId: (item) => item.id,
@@ -13,13 +13,23 @@ export const { selectAll: buscarRecados, selectById: buscarRecadosId } = adapter
 
 export const getRecadosUser = createAsyncThunk('/recados', async (id:string) => {
   const resp = await apiGet(`/user/${id}/recados`)
+  console.log('buscando recados user');
+  
   
   return resp
 })
 
 export const getRecadosUserbyKey = createAsyncThunk<ResponseAPI, KeyData>('/buscaporchave', async (params: KeyData) => {
   const resp = await apiGet(`/user/${params.idUser}/buscaporchave/${params.key}`)
-  
+  console.log('buscando recados user por key');
+
+  return resp
+})
+
+export const getRecadosArquivados = createAsyncThunk('/arquivados', async (id:string) => {
+  const resp = await apiGet(`/user/${id}/arquivados`)
+  console.log('buscando recados user por key');
+
   return resp
 })
 
@@ -60,6 +70,7 @@ const recadosSlice = createSlice({
     })
     builder.addCase(getRecadosUser.fulfilled, (state, action: PayloadAction<ResponseAPI>) => {
       if (action.payload.success){
+        adapter.removeAll(state)
         adapter.addMany(state, action.payload.data)
       }
 
@@ -73,6 +84,7 @@ const recadosSlice = createSlice({
     })
     builder.addCase(getRecadosUserbyKey.fulfilled, (state, action: PayloadAction<ResponseAPI>) => {
       if (action.payload.success){
+        adapter.removeAll(state)
         adapter.addMany(state, action.payload.data)
       }
 
@@ -80,6 +92,22 @@ const recadosSlice = createSlice({
       state.success = action.payload.success
       state.message = action.payload.message
     })
+
+    //busca recados arquivados
+    builder.addCase(getRecadosArquivados.pending, (state) => {
+      state.loading = true
+    })
+    builder.addCase(getRecadosArquivados.fulfilled, (state, action: PayloadAction<ResponseAPI>) => {
+      if (action.payload.success){
+        adapter.removeAll(state)
+        adapter.addMany(state, action.payload.data)
+      }
+
+      state.loading = false;
+      state.success = action.payload.success
+      state.message = action.payload.message
+    })
+
 
   //post recados 
   builder.addCase(newRecado.pending, (state) => {
