@@ -10,7 +10,7 @@ interface InputDefaultProps {
     handleChange: (value: string, key: InputName) => void;
 }
 
-export type InputName = 'name' | 'email' | 'password' | 'repassword' | 'description' | 'detail'
+export type InputName = 'name' | 'email' | 'password' | 'repassword' | 'description' | 'detail' | 'key'
 
 export function InputDefault({ type, name, label, value, color, handleChange }: InputDefaultProps) {
     return (

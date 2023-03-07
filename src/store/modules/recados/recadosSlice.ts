@@ -1,7 +1,7 @@
 import { createAsyncThunk, createEntityAdapter, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../..';
 import { apiDelete, apiGet, apiPost, apiPut } from '../../../serviceAPI/serviceAPI';
-import { Recado, RecadoData, ResponseAPI } from '../typeStore';
+import { KeyData, Recado, RecadoData, ResponseAPI } from '../typeStore';
 
 const adapter = createEntityAdapter<Recado>({
   selectId: (item) => item.id,
@@ -13,6 +13,12 @@ export const { selectAll: buscarRecados, selectById: buscarRecadosId } = adapter
 
 export const getRecadosUser = createAsyncThunk('/recados', async (id:string) => {
   const resp = await apiGet(`/user/${id}/recados`)
+  
+  return resp
+})
+
+export const getRecadosUserbyKey = createAsyncThunk<ResponseAPI, KeyData>('/buscaporchave', async (params: KeyData) => {
+  const resp = await apiGet(`/user/${params.idUser}/buscaporchave/${params.key}`)
   
   return resp
 })
@@ -53,6 +59,19 @@ const recadosSlice = createSlice({
       state.loading = true
     })
     builder.addCase(getRecadosUser.fulfilled, (state, action: PayloadAction<ResponseAPI>) => {
+      if (action.payload.success){
+        adapter.addMany(state, action.payload.data)
+      }
+
+      state.loading = false;
+      state.success = action.payload.success
+      state.message = action.payload.message
+    })
+    //busca por palavra chave
+    builder.addCase(getRecadosUserbyKey.pending, (state) => {
+      state.loading = true
+    })
+    builder.addCase(getRecadosUserbyKey.fulfilled, (state, action: PayloadAction<ResponseAPI>) => {
       if (action.payload.success){
         adapter.addMany(state, action.payload.data)
       }

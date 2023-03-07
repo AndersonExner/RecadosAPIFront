@@ -13,6 +13,11 @@ export interface RecadoData {
   check?: boolean
 }
 
+export interface KeyData {
+  idUser: string,
+  key: string
+}
+
 export interface User {
   id: string;
   name: string;

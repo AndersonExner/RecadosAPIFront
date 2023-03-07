@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { InputDefault, InputName } from '../../components/InputDefault';
 import { ModalAttDel} from '../../components/Modal';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import {  RecadoData } from '../../store/modules/typeStore';
-import { buscarRecados, getRecadosUser, newRecado } from '../../store/modules/recados/recadosSlice';
+import {  KeyData, RecadoData, Recado } from '../../store/modules/typeStore';
+import { buscarRecados, getRecadosUser, newRecado, getRecadosUserbyKey } from '../../store/modules/recados/recadosSlice';
 import { useAppThemeContext } from '../../Context/ThemeContext';
 import { getUserById } from '../../store/modules/userLogged/userLoggedSlice';
 import CircularIndeterminate from '../../components/Loader';
@@ -15,10 +15,11 @@ export function Home(){
 
   //states variaveis
   const [description, setDescription] = useState('');
+  const [keyBusca, setKeyBusca] = useState('');
   const [detail, setDetail] = useState('');
   const [idSelec, setIdSelec] = useState('');
   const [modeModal, setModeModal] = useState<'editarRecado' | 'deletarRecado' | 'arquivarRecado' | 'desarquivarRecado'>('editarRecado');
-  const [mode, setMode] = useState<'normal' | 'arquivados'>('normal');
+  const [mode, setMode] = useState<'normal' | 'arquivados' | 'filtrados'>('normal');
   const [openModal, setOpenModal] = useState(false)
   const [loading, setLoading] = useState(false)
   
@@ -29,7 +30,8 @@ export function Home(){
   const recadosRedux = useAppSelector(buscarRecados)
 
   const [recadosNormais, setRecadosNormais] = useState(recadosRedux)
-  const [recadosArquivados, setRecadosArquivados] = useState(recadosRedux)
+  const [recadosArquivados, setRecadosArquivados] = useState (recadosRedux)
+  const [recadosFiltrados, setRecadosFiltrados] = useState (recadosRedux)
     
   const dispatch = useAppDispatch();
   const navigate =  useNavigate();
@@ -57,7 +59,6 @@ export function Home(){
 
   useEffect(
       () => {
-      save()
       setRecadosArquivados(recadosRedux.filter((e) => e.check === true))
       setRecadosNormais(recadosRedux.filter((e) => e.check === false))
     },
@@ -90,6 +91,10 @@ export function Home(){
         setDetail(value);
       break;
 
+      case 'key':
+        setKeyBusca(value);
+      break;
+
       default:
     }
   }
@@ -116,8 +121,7 @@ export function Home(){
     setDetail('')
   }
 
-  const save = () => {
-    dispatch(getRecadosUser(ID))   
+  const save = () => { 
   }
 
 
@@ -150,6 +154,20 @@ export function Home(){
     setOpenModal(true);
   }
 
+  const buscarKey = () => {
+    if(keyBusca === ""){
+      alert('Campo vazio')
+      return
+    }
+  
+    const chaveBuscaData: KeyData = {
+      idUser: userLoggeID(),
+      key: keyBusca
+    }
+  
+    dispatch(getRecadosUserbyKey(chaveBuscaData))
+  }
+
   const handleCloseModal = () => { 
     setOpenModal(false);
   }
@@ -180,22 +198,31 @@ export function Home(){
           </Grid>
         </Grid>  
 
-        <Grid container justifyContent={'space-around'} alignItems={'center'} marginY={2} padding={2} >
-          <Grid md={4} xs={12} mt={3}>
+        <Grid container justifyContent={'space-around'} alignItems={'center'} padding={2} >
+          <Grid md={3} xs={12}>
             <InputDefault type='text' label='Descrição' name='description' value={description} color='primary' handleChange={mudarInput} />
           </Grid>
-          <Grid md={7} xs={12} mt={3}>
+          <Grid md={5} xs={12} >
             <InputDefault type='text' label='Recado' name='detail' value={detail} color='primary' handleChange={mudarInput} />
+          </Grid>
+          <Grid md={2} xs={12}>
+            <Button variant='contained' color='primary' size='large' onClick={salvarRecado}>Salvar Recado</Button>
           </Grid>
         </Grid>
 
         <Grid container justifyContent={'space-around'} alignItems={'center'} padding={2}>
-        <Grid md={2} xs={12}>
-            <Button variant='contained' color='primary' size='large' onClick={salvarRecado}>Salvar Recado</Button>
+          <Grid md={3} xs={12} >
+            <InputDefault type='text' label='Buscar por Palavra Chave' name='key' value={keyBusca} color='primary' handleChange={mudarInput} />
+          </Grid>
+          <Grid md={2} xs={12}  >
+            <Button variant='contained' color='primary' size='large' onClick={buscarKey}>Buscar</Button>
+          </Grid>
+          <Grid md={2} xs={12}  >
+            <Button variant='contained' color='primary' size='large' onClick={() => setMode('normal')}>Limpar Filtro</Button>
           </Grid>
           <Grid md={2} xs={12}>
             {mode === 'normal' && (
-              <Button variant='contained' color='primary' size='large' onClick={() => setMode('arquivados')}>Ver Arquivados</Button>
+              <Button variant='contained' color='primary' size='large' onClick={() => setMode('arquivados')}>Ver Recados Arquivados</Button>
             )}
             {mode === 'arquivados' && (
               <Button variant='contained' color='primary' size='large' onClick={() => setMode('normal')}>Ver Normais</Button>
@@ -248,6 +275,20 @@ export function Home(){
 
                   {mode === 'arquivados' && (
                   recadosArquivados.map((row, index) =>  
+                  <TableRow component="th" scope="row" key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell align="center">{index + 1}</TableCell>
+                    <TableCell align="center">{row.description}</TableCell>
+                    <TableCell align="center">{row.detail}</TableCell>
+                    <TableCell align="center">
+                      <Button color='success' variant='contained' sx={{margin: '0 15px'}} onClick={() => editMessage(row.id)}>Editar</Button>
+                      <Button color='error' variant='contained' sx={{margin: '0 15px'}} onClick={() => deleteMessage(row.id)}>Apagar</Button>
+                      <Button color='info' variant='contained' sx={{margin: '0 15px'}} onClick={() => desarquivarMessage(row.id)}>Desarquivar</Button>
+                    </TableCell>
+                  </TableRow>
+                  ))}
+
+                  {mode === 'filtrados' && (
+                  recadosFiltrados.map((row, index) =>  
                   <TableRow component="th" scope="row" key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell align="center">{index + 1}</TableCell>
                     <TableCell align="center">{row.description}</TableCell>
