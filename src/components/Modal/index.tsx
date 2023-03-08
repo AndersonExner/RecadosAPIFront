@@ -19,7 +19,6 @@ export function ModalAttDel({ open, handleClose, id, mode}: ModalProps) {
     const [description, setDescription] = useState('');
     const [detail, setDetail] = useState('');
             
-    const respostaRecados = useAppSelector((state) => state.recados)
     const recado = useAppSelector((state) => buscarRecadosId(state, id));
     const dispatch = useAppDispatch();
 
