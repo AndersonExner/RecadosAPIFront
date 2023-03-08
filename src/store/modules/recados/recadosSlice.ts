@@ -28,7 +28,7 @@ export const getRecadosUserbyKey = createAsyncThunk<ResponseAPI, KeyData>('/busc
 
 export const getRecadosArquivados = createAsyncThunk('/arquivados', async (id:string) => {
   const resp = await apiGet(`/user/${id}/arquivados`)
-  console.log('buscando recados user por key');
+  console.log('buscando recados user arquivados');
 
   return resp
 })
@@ -61,7 +61,9 @@ const recadosSlice = createSlice({
     message: '',
     loading:false
   }),
-  reducers: {},
+  reducers: {
+    atualizarState: adapter.updateOne
+  },
 
   //get recados
   extraReducers: (builder) => {
@@ -84,7 +86,6 @@ const recadosSlice = createSlice({
     })
     builder.addCase(getRecadosUserbyKey.fulfilled, (state, action: PayloadAction<ResponseAPI>) => {
       if (action.payload.success){
-        adapter.removeAll(state)
         adapter.addMany(state, action.payload.data)
       }
 
@@ -150,5 +151,6 @@ const recadosSlice = createSlice({
   },
 });
 
+export const { atualizarState } = recadosSlice.actions
 
 export const recadosReducer = recadosSlice.reducer;

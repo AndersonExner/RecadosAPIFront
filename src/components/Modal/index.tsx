@@ -1,7 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
 import React, {useState, useEffect} from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { buscarRecadosId, deleteRecado, getRecadosUser, updateRecado } from '../../store/modules/recados/recadosSlice';
+import { atualizarState, buscarRecadosId, deleteRecado, getRecadosArquivados, getRecadosUser, updateRecado } from '../../store/modules/recados/recadosSlice';
 import { RecadoData } from '../../store/modules/typeStore';
 
 
@@ -19,6 +19,7 @@ export function ModalAttDel({ open, handleClose, id, mode}: ModalProps) {
     const [description, setDescription] = useState('');
     const [detail, setDetail] = useState('');
             
+    const respostaRecados = useAppSelector((state) => state.recados)
     const recado = useAppSelector((state) => buscarRecadosId(state, id));
     const dispatch = useAppDispatch();
 
@@ -37,13 +38,13 @@ export function ModalAttDel({ open, handleClose, id, mode}: ModalProps) {
 
     const handleConfirm = () => {
 
-
         if(mode === 'deletarRecado'){
             const infoRecado: RecadoData = {
                 idUser: userID,
                 idRecado: recado!.id,
                 description: recado!.description,
-                detail: recado!.detail
+                detail: recado!.detail,
+                check: recado!.check
             }
             dispatch(deleteRecado(infoRecado));
         }
@@ -59,9 +60,10 @@ export function ModalAttDel({ open, handleClose, id, mode}: ModalProps) {
                 idUser: userID,
                 idRecado: recado!.id,
                 description: description,
-                detail: detail
+                detail: detail,
+                check: recado!.check
             }
-            dispatch(updateRecado(infoRecado));
+            dispatch(updateRecado(infoRecado))
         }
 
         if(mode === 'arquivarRecado'){
@@ -72,7 +74,7 @@ export function ModalAttDel({ open, handleClose, id, mode}: ModalProps) {
                 detail: recado!.detail,
                 check: true,
             }
-            dispatch(updateRecado(infoRecado));
+            dispatch(updateRecado(infoRecado))
         }
 
         if(mode === 'desarquivarRecado'){
@@ -84,8 +86,8 @@ export function ModalAttDel({ open, handleClose, id, mode}: ModalProps) {
                 check: false,
             }
             dispatch(updateRecado(infoRecado));
+            
         }
-
         
         handleClose();
     }

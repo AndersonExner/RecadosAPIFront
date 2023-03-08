@@ -10,7 +10,7 @@ export interface RecadoData {
   idRecado?:string
   description: string;
   detail: string;
-  check?: boolean
+  check: boolean
 }
 
 export interface KeyData {

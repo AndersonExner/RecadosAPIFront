@@ -130,6 +130,10 @@ export function Form({ type }: FormProps) {
 
   const createAccount = () => {
     
+      if(repassword === ""){
+        alert('campo nao preenchido')
+      }
+
       if(name.length > 3 && password === repassword){
         dispatch(saveNewUser({name, email, password}))
         clearInputs();

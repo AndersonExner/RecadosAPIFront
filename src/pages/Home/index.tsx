@@ -5,7 +5,7 @@ import { InputDefault, InputName } from '../../components/InputDefault';
 import { ModalAttDel} from '../../components/Modal';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {  KeyData, RecadoData, Recado } from '../../store/modules/typeStore';
-import { buscarRecados, getRecadosUser, newRecado, getRecadosUserbyKey, getRecadosArquivados } from '../../store/modules/recados/recadosSlice';
+import { buscarRecados, getRecadosUser, newRecado, getRecadosUserbyKey, getRecadosArquivados, atualizarState } from '../../store/modules/recados/recadosSlice';
 import { useAppThemeContext } from '../../Context/ThemeContext';
 import { getUserById } from '../../store/modules/userLogged/userLoggedSlice';
 import CircularIndeterminate from '../../components/Loader';
@@ -18,7 +18,7 @@ export function Home(){
   const [keyBusca, setKeyBusca] = useState('');
   const [detail, setDetail] = useState('');
   const [idSelec, setIdSelec] = useState('');
-  const [mode, setMode] = useState <'normal' | 'arquivado'> ('normal')
+  const [mode, setMode] = useState <'normal' | 'arquivado' | 'filtro' > ('normal')
   const [modeModal, setModeModal] = useState<'editarRecado' | 'deletarRecado' | 'arquivarRecado' | 'desarquivarRecado'>('editarRecado');
 
   const [openModal, setOpenModal] = useState(false)
@@ -29,7 +29,7 @@ export function Home(){
   const respostaRecados = useAppSelector((state) => state.recados)
 
   const recadosRedux = useAppSelector(buscarRecados)
-    
+  
   const dispatch = useAppDispatch();
   const navigate =  useNavigate();
 
@@ -39,8 +39,8 @@ export function Home(){
 
   const ID = userLoggeID()
 
-
   const {toggleTheme} = useAppThemeContext()
+
 
   useEffect(
     () => {   
@@ -48,31 +48,31 @@ export function Home(){
         navigate('/')
       }
     },
-    [navigate]
+    [navigate, ID]
   );
 
   useEffect(
-  () => {
-    dispatch(getRecadosUser(ID))
-  },
-  [dispatch]
+    
+    () => {
+
+      if(respostaRecados.loading === true){
+        setLoading(true)
+        console.log('carregando');
+      }
+  
+      if(respostaRecados.loading === false){
+        setLoading(false)
+        console.log('carregado');
+      }
+    },
+    [respostaRecados.loading]
   )
 
-    useEffect(
-      () => {
-        if(respostaRecados.loading === true){
-          setLoading(true)
-          console.log('carregando');
-        }
-  
-        if(respostaRecados.loading === false){
-          setLoading(false)
-          console.log('carregado');
-        }
-      },
-      [respostaRecados.loading]
-    )
-
+  useEffect(
+    () => {   
+      atualizar()
+    },[]
+  );
 
   const mudarInput = (value:string, key:InputName) => {
     switch(key) {
@@ -92,6 +92,18 @@ export function Home(){
     }
   }
 
+  const atualizar = () => {
+
+    if(mode === 'normal'){
+      dispatch(getRecadosUser(ID))
+    }
+
+    if(mode === 'arquivado'){
+      dispatch(getRecadosArquivados(ID))
+    }
+
+  }
+
   const salvarRecado = () => {
     
     if(description === '' || detail === ''){
@@ -102,10 +114,13 @@ export function Home(){
     const novoRecado: RecadoData = {
       idUser: ID,
       description,
-      detail 
+      detail,
+      check: false
     }
 
     dispatch(newRecado(novoRecado));
+    setMode('normal')
+    atualizar()
     limpaCampos();
   }
 
@@ -132,13 +147,14 @@ export function Home(){
   }
 
   const buscarArquivados = () => {
-    setMode('arquivado')
+    setMode('filtro')
     dispatch(getRecadosArquivados(ID))
+    setMode('arquivado')
   }
 
   const buscarRecadosNormais = () => {
-    setMode('normal')
     dispatch(getRecadosUser(ID))
+    setMode('normal')
   }
 
   const arquivarMessage = (id: string) => {
@@ -156,6 +172,7 @@ export function Home(){
   const buscarKey = () => {
     if(keyBusca === ""){
       dispatch(getRecadosUser(ID))
+      setMode('normal')
       return
     }
   
@@ -163,6 +180,9 @@ export function Home(){
       idUser: userLoggeID(),
       key: keyBusca
     }
+
+    setKeyBusca('')
+    setMode('filtro')
   
     dispatch(getRecadosUserbyKey(chaveBuscaData))
     
@@ -215,7 +235,15 @@ export function Home(){
             <InputDefault type='text' label='Buscar por Palavra Chave' name='key' value={keyBusca} color='primary' handleChange={mudarInput} />
           </Grid>
           <Grid md={2} xs={12}  >
-            <Button variant='contained' color='primary' size='large' onClick={buscarKey}>Buscar</Button>
+            {mode === ('normal') && (
+              <Button variant='contained' color='primary' size='large' onClick={buscarKey}>Buscar</Button>  
+            )}
+            {mode === ('arquivado') && (
+              <Button variant='contained' color='primary' size='large' onClick={buscarKey}>Buscar</Button>  
+            )}
+            {mode === ('filtro') && (
+              <Button variant='contained' color='primary' size='large' onClick={buscarKey}>Voltar</Button>  
+            )}
           </Grid>
           <Grid md={2} xs={12}  >
             {mode === 'normal' && (
