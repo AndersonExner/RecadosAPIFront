@@ -93,6 +93,7 @@ export function Home(){
   }
 
   const atualizar = () => {
+    dispatch(getRecadosUser(ID))
   }
 
   const salvarRecado = () => {
