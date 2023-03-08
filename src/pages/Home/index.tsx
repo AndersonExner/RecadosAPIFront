@@ -184,6 +184,7 @@ export function Home(){
   const handleCloseModal = () => { 
     setOpenModal(false);
     setMode('normal')
+    atualizar()
   }
 
   const imageBack = require('../../assets/image-bg4.jpg')
@@ -286,7 +287,9 @@ export function Home(){
                     <TableCell align="center">{row.description}</TableCell>
                     <TableCell align="center">{row.detail}</TableCell>
                     <TableCell align="center">
+                      {mode === 'normal' &&
                       <Button color='success' variant='contained' sx={{margin: '0 15px'}} onClick={() => editMessage(row.id)}>Editar</Button>
+                      }
                       <Button color='error' variant='contained' sx={{margin: '0 15px'}} onClick={() => deleteMessage(row.id)}>Apagar</Button>
                       {mode === 'normal' && (
                         <Button color='info' variant='contained' sx={{margin: '0 15px'}} onClick={() => arquivarMessage(row.id)}>Arquivar</Button>
