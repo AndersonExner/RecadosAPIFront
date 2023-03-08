@@ -136,11 +136,10 @@ export function Home(){
     setModeModal('deletarRecado');
     setIdSelec(id);
     setOpenModal(true); 
-    setMode('normal')
+
   }
 
   const buscarArquivados = () => {
-    setMode('filtro')
     dispatch(getRecadosArquivados(ID))
     setMode('arquivado')
   }
@@ -183,8 +182,7 @@ export function Home(){
 
   const handleCloseModal = () => { 
     setOpenModal(false);
-    setMode('normal')
-    atualizar()
+    
   }
 
   const imageBack = require('../../assets/image-bg4.jpg')
