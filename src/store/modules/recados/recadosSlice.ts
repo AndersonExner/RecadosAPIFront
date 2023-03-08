@@ -62,7 +62,7 @@ const recadosSlice = createSlice({
     loading:false
   }),
   reducers: {
-    atualizarState: adapter.updateOne
+    atualizarState: adapter.removeAll
   },
 
   //get recados

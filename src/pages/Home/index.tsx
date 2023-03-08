@@ -93,15 +93,6 @@ export function Home(){
   }
 
   const atualizar = () => {
-
-    if(mode === 'normal'){
-      dispatch(getRecadosUser(ID))
-    }
-
-    if(mode === 'arquivado'){
-      dispatch(getRecadosArquivados(ID))
-    }
-
   }
 
   const salvarRecado = () => {
@@ -190,6 +181,7 @@ export function Home(){
 
   const handleCloseModal = () => { 
     setOpenModal(false);
+    atualizar()
   }
 
   const imageBack = require('../../assets/image-bg4.jpg')

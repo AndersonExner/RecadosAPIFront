@@ -74,8 +74,11 @@ export function ModalAttDel({ open, handleClose, id, mode}: ModalProps) {
                 detail: recado!.detail,
                 check: true,
             }
-            dispatch(updateRecado(infoRecado))
-        }
+            dispatch(updateRecado(infoRecado)) 
+            .then(()=> {                
+                dispatch(getRecadosUser(userID))
+            })
+        }        
 
         if(mode === 'desarquivarRecado'){
             const infoRecado: RecadoData = {
@@ -84,8 +87,11 @@ export function ModalAttDel({ open, handleClose, id, mode}: ModalProps) {
                 description: recado!.description,
                 detail: recado!.detail,
                 check: false,
-            }
-            dispatch(updateRecado(infoRecado));
+            } 
+                dispatch(updateRecado(infoRecado))
+                .then(()=> {                
+                    dispatch(getRecadosArquivados(userID))
+                })
             
         }
         
