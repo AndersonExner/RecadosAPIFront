@@ -72,6 +72,7 @@ const recadosSlice = createSlice({
     })
     builder.addCase(getRecadosUser.fulfilled, (state, action: PayloadAction<ResponseAPI>) => {
       if (action.payload.success){
+        adapter.removeAll(state)
         adapter.addMany(state, action.payload.data)
       }
 
@@ -85,6 +86,7 @@ const recadosSlice = createSlice({
     })
     builder.addCase(getRecadosUserbyKey.fulfilled, (state, action: PayloadAction<ResponseAPI>) => {
       if (action.payload.success){
+        adapter.removeAll(state)
         adapter.addMany(state, action.payload.data)
       }
 
@@ -99,6 +101,7 @@ const recadosSlice = createSlice({
     })
     builder.addCase(getRecadosArquivados.fulfilled, (state, action: PayloadAction<ResponseAPI>) => {
       if (action.payload.success){
+        adapter.removeAll(state)
         adapter.addMany(state, action.payload.data)
       }
 
